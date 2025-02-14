@@ -1,0 +1,15 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:latest
+    container_name: universitly_db
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    volumes:
+      - universitly_postgres_data:/var/lib/postgresql/data
+    env_file:
+      - ../.env
+
+volumes:
+  universitly_postgres_data:
