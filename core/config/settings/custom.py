@@ -7,4 +7,4 @@ PHONE_NUMBER_ACCESS_CONTROL: Dict[str, List[str]] = {
 
 USE_E164: bool = True
 
-TRUNCATE_TOO_LONG_PHONE_NUMBERS: bool = True
+TRUNCATE_TOO_LONG_PHONE_NUMBERS: bool = True # will only truncate for validation and won't actually store or operate truncated values, at some point will do that too
