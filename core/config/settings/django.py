@@ -15,6 +15,7 @@ ALLOWED_HOSTS = env('ALLOWED_HOSTS', default=['*'])
 
 
 INSTALLED_APPS = [
+    'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -23,8 +24,10 @@ INSTALLED_APPS = [
 
     'rest_framework',
 
-    'core.apps.users.apps.UsersConfig',
     'core.apps.common.apps.CommonConfig',
+    'core.apps.users.apps.UsersConfig',
+    'core.apps.students.apps.StudentsConfig',
+    'core.apps.teachers.apps.TeachersConfig',
 ]
 
 MIDDLEWARE = [

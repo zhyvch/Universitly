@@ -47,3 +47,7 @@ createsuperuser:
 .PHONY: collectstatic
 collectstatic:
 	${EXEC} ${APP_CONTAINER} ${MANAGE} collectstatic
+
+.PHONY: shell
+shell:
+	${EXEC} ${APP_CONTAINER} ${MANAGE} shell

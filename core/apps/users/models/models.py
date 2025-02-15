@@ -5,7 +5,7 @@ from django.contrib.auth.base_user import AbstractBaseUser
 from django.utils.translation import gettext_lazy as _
 
 from core.apps.common.models import PhoneNumberField
-from core.apps.users.managers import UserManager
+from core.apps.users.models import UserManager
 
 
 class User(AbstractBaseUser, PermissionsMixin):
@@ -31,6 +31,14 @@ class User(AbstractBaseUser, PermissionsMixin):
         upload_to='users/',
         null=True,
         blank=True,
+    )
+    is_student = models.BooleanField(
+        verbose_name=_('Is student'),
+        default=False,
+    )
+    is_teacher = models.BooleanField(
+        verbose_name=_('Is teacher'),
+        default=False,
     )
     date_joined = models.DateTimeField(
         verbose_name=_('Date joined'),
