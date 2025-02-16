@@ -8,3 +8,16 @@ class TimestampedBaseModel(models.Model):
 
     class Meta:
         abstract = True
+        ordering = ['-created_at']
+
+
+class TitledBaseModel(models.Model):
+    title = models.CharField(verbose_name=_('Title'), max_length=254)
+
+    class Meta:
+        abstract = True
+
+
+class TitledTimestampedBaseModel(TitledBaseModel, TimestampedBaseModel):
+    class Meta:
+        abstract = True

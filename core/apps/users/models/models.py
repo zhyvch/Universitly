@@ -26,6 +26,11 @@ class User(AbstractBaseUser, PermissionsMixin):
         max_length=254,
         blank=True,
     )
+    middle_name = models.CharField(
+        verbose_name=_('Middle name or patronymic'),
+        max_length=254,
+        blank=True,
+    )
     photo = models.ImageField(
         verbose_name=_('Photo'),
         upload_to='users/',
