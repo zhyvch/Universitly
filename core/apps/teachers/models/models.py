@@ -11,6 +11,7 @@ class Teacher(User):
         proxy = True
         verbose_name = _('Teacher')
         verbose_name_plural = _('Teachers')
+        ordering = ['first_name', 'last_name']
 
     def save(self, *args, **kwargs):
         self.is_teacher = True

@@ -1,8 +1,11 @@
 from django.db import models
+from django.db.models import Q, F, Func
+from django.db.models.constraints import CheckConstraint
+from django.db.models.functions import Length
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
-from core.apps.common.models import TitledTimestampedBaseModel
+from core.apps.common.models import TitledTimestampedBaseModel, TitledBaseModel
 from core.config.settings import AUTH_USER_MODEL
 
 
@@ -34,6 +37,14 @@ class Institution(TitledTimestampedBaseModel):
         related_name='administrated_institutions',
     )
 
+    @property
+    def number_of_courses(self):
+        return self.courses.count()
+
+    @property
+    def number_of_admins(self):
+        return self.admins.count()
+
     class Meta:
         verbose_name = _('Institution')
         verbose_name_plural = _('Institutions')
@@ -59,6 +70,18 @@ class Course(TitledTimestampedBaseModel):
         to=AUTH_USER_MODEL,
         related_name='enrolled_courses',
     )
+
+    @property
+    def number_of_sections(self):
+        return self.sections.count()
+
+    @property
+    def number_of_teachers(self):
+        return self.teachers.count()
+
+    @property
+    def number_of_students(self):
+        return self.students.count()
 
     class Meta:
         verbose_name = _('Course')
@@ -91,6 +114,22 @@ class Section(TitledTimestampedBaseModel):
         blank=True,
     )
 
+    @property
+    def is_lecture(self):
+        return self.type == self.SectionType.LECTURE
+
+    @property
+    def is_homework(self):
+        return self.type == self.SectionType.HOMEWORK
+
+    @property
+    def is_test(self):
+        return self.type == self.SectionType.TEST
+
+    @property
+    def number_of_files(self):
+        return self.files.count()
+
     class Meta:
         verbose_name = _('Section')
         verbose_name_plural = _('Sections')
@@ -119,7 +158,41 @@ class SectionFile(models.Model):
         return self.file.name
 
 
-class SectionTest(TitledTimestampedBaseModel):
+class SectionHomework(TitledBaseModel):
+    section = models.OneToOneField(
+        verbose_name=_('Related section'),
+        to=Section,
+        on_delete=models.CASCADE,
+        related_name='homework',
+    )
+    content = models.TextField(
+        verbose_name=_('Content'),
+        blank=True,
+    )
+    deadline = models.DateTimeField(
+        verbose_name=_('Deadline'),
+        blank=True,
+    )
+
+    @property
+    def all_students_submitted(self):
+        return self.homeworks.count() == self.section.course.students.count()
+
+    class Meta:
+        verbose_name = _('Section homework')
+        verbose_name_plural = _('Section homeworks')
+        constraints = [
+            CheckConstraint(
+                condition=Q(deadline__gt=timezone.now()),
+                name='deadline_gt_now',
+            ),
+        ]
+
+    def __str__(self):
+        return self.title
+
+
+class SectionTest(TitledBaseModel):
     section = models.OneToOneField(
         verbose_name=_('Related section'),
         to=Section,
@@ -141,13 +214,29 @@ class SectionTest(TitledTimestampedBaseModel):
         verbose_name=_('Attempts'),
         default=1,
     )
-    deadline = models.DateTimeField(
-        verbose_name=_('Deadline'),
+    start_date = models.DateTimeField(
+        verbose_name=_('Start date'),
+        default=timezone.now,
+    )
+    end_date = models.DateTimeField(
+        verbose_name=_('End date'),
     )
 
     @property
     def is_open(self):
-        return self.deadline > timezone.now()
+        return self.start_date <= timezone.now() < self.end_date
+
+    @property
+    def questions_count(self):
+        return Length(Func(F('questions'), function='jsonb_object_keys'))
+
+    @property
+    def score_per_question(self):
+        return F('max_points') / self.questions_count
+
+    @property
+    def number_of_attempts(self):
+        return self.attempts.count()
 
     def letter_grades_to_score_bound(self):
         return {
@@ -155,7 +244,7 @@ class SectionTest(TitledTimestampedBaseModel):
             'B': self.max_score * 0.8,
             'C': self.max_score * 0.7,
             'D': self.max_score * 0.6,
-            'F': self.max_score * 0.5,
+            'F': 0,
         }
 
     def get_letter_grade(self, score):
@@ -166,6 +255,20 @@ class SectionTest(TitledTimestampedBaseModel):
     class Meta:
         verbose_name = _('Section test')
         verbose_name_plural = _('Section tests')
+        constraints = [
+            CheckConstraint(
+                condition=Q(max_score__gte=F('passing_score')),
+                name='max_score_gte_passing_score',
+            ),
+            models.CheckConstraint(
+                condition=Q(start_date__gte=timezone.now()),
+                name='start_date_gte_now',
+            ),
+            models.CheckConstraint(
+                condition=Q(end_date__gt=F('start_date')),
+                name='end_date_gt_start_date',
+            ),
+        ]
 
     def __str__(self):
         return self.title
