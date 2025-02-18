@@ -2,7 +2,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from core.apps.common.models import TimestampedBaseModel
-from core.apps.courses.models import SectionTest, SectionHomework
+from core.apps.education.models import SectionTest, SectionHomework
 from core.apps.students.models import StudentManager
 from core.apps.users.models import User
 

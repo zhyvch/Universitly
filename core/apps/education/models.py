@@ -58,7 +58,7 @@ class Course(TitledTimestampedBaseModel):
         verbose_name=_('Related institution'),
         to=Institution,
         on_delete=models.CASCADE,
-        related_name='courses',
+        related_name='education',
     )
     teachers = models.ManyToManyField(
         verbose_name=_('Teachers'),
