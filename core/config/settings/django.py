@@ -13,6 +13,9 @@ DEBUG = env('DEBUG', default=True)
 
 ALLOWED_HOSTS = env('ALLOWED_HOSTS', default=['*'])
 
+DEBUG_TOOLBAR_CONFIG = {
+    'SHOW_TOOLBAR_CALLBACK': lambda request: True,
+}
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -23,6 +26,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'rest_framework',
+    'debug_toolbar',
+    'django_filters',
 
     'core.apps.common.apps.CommonConfig',
     'core.apps.users.apps.UsersConfig',
@@ -40,6 +45,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
 ROOT_URLCONF = 'core.config.urls'

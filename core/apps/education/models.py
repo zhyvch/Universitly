@@ -23,6 +23,7 @@ class Institution(TitledTimestampedBaseModel):
     icon = models.ImageField(
         verbose_name=_('Icon'),
         upload_to='institutions/',
+        default='institutions/default.png',
     )
     owner = models.ForeignKey(
         verbose_name=_('Owner'),
@@ -31,19 +32,11 @@ class Institution(TitledTimestampedBaseModel):
         related_name='owned_institutions',
         null=True,
     )
-    admins = models.ManyToManyField(
-        verbose_name=_('Admins'),
-        to=AUTH_USER_MODEL,
-        related_name='administrated_institutions',
-    )
 
     @property
     def number_of_courses(self):
         return self.courses.count()
 
-    @property
-    def number_of_admins(self):
-        return self.admins.count()
 
     class Meta:
         verbose_name = _('Institution')
@@ -58,7 +51,7 @@ class Course(TitledTimestampedBaseModel):
         verbose_name=_('Related institution'),
         to=Institution,
         on_delete=models.CASCADE,
-        related_name='education',
+        related_name='courses',
     )
     teachers = models.ManyToManyField(
         verbose_name=_('Teachers'),

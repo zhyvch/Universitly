@@ -10,10 +10,9 @@ class SectionFileInline(admin.TabularInline):
 
 @admin.register(Institution)
 class InstitutionAdmin(admin.ModelAdmin):
-    list_display = ('title', 'type', 'owner', 'number_of_courses', 'number_of_admins')
+    list_display = ('title', 'type', 'owner', 'number_of_courses')
     list_filter = ('type',)
     search_fields = ('title', 'owner__email')
-    filter_horizontal = ('admins',)
     raw_id_fields = ('owner',)
 
 
