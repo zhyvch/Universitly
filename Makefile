@@ -51,3 +51,7 @@ collectstatic:
 .PHONY: shell
 shell:
 	${EXEC} ${APP_CONTAINER} ${MANAGE} shell
+
+.PHONY: celery-logs
+celery-logs:
+	${LOGS} universitly_celery_worker -f

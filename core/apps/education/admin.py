@@ -2,7 +2,6 @@ from django.contrib import admin
 
 from .models import Institution, Course, Section, SectionFile, SectionHomework, SectionTest
 
-
 class SectionFileInline(admin.TabularInline):
     model = SectionFile
     extra = 1
