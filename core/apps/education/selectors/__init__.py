@@ -1,1 +1,1 @@
-from .institution_selectors import *
+from .institution import *

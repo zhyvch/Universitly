@@ -1,21 +1,31 @@
-from pathlib import Path
+from core.config.env import BASE_DIR, env
 
-import environ
+env.read_env(env_file=BASE_DIR / '.env')
 
-BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent
+SECRET_KEY = env.str('SECRET_KEY', default='secret_key')
 
-env = environ.Env()
-environ.Env.read_env(env_file=BASE_DIR / '.env')
+DEBUG = env.bool('DJANGO_DEBUG', default=True)
 
-SECRET_KEY = env('SECRET_KEY', default='secret_key')
+ALLOWED_HOSTS = env.list('DJANGO_ALLOWED_HOSTS', default=['*'])
 
-DEBUG = env('DEBUG', default=True)
+LOCAL_APPS = [
+    'core.apps.common.apps.CommonConfig',
+    'core.apps.tasks.apps.TasksConfig',
+    'core.apps.users.apps.UsersConfig',
+    'core.apps.students.apps.StudentsConfig',
+    'core.apps.teachers.apps.TeachersConfig',
+    'core.apps.education.apps.EducationConfig',
+]
 
-ALLOWED_HOSTS = env('ALLOWED_HOSTS', default=['*'])
-
-DEBUG_TOOLBAR_CONFIG = {
-    'SHOW_TOOLBAR_CALLBACK': lambda request: True,
-}
+THIRD_PARTY_APPS = [
+    'rest_framework',
+    'rest_framework_simplejwt',
+    'rest_framework_simplejwt.token_blacklist',
+    'django_filters',
+    'django_celery_results',
+    'django_celery_beat',
+    'corsheaders',
+]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -24,20 +34,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-
-    'rest_framework',
-    'debug_toolbar',
-    'django_filters',
-
-    'core.apps.common.apps.CommonConfig',
-    'core.apps.users.apps.UsersConfig',
-    'core.apps.students.apps.StudentsConfig',
-    'core.apps.teachers.apps.TeachersConfig',
-    'core.apps.education.apps.EducationConfig',
+    *THIRD_PARTY_APPS,
+    *LOCAL_APPS,
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -45,7 +48,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
 ROOT_URLCONF = 'core.config.urls'
@@ -116,3 +118,19 @@ AUTH_USER_MODEL = 'users.User'
 MEDIA_ROOT = BASE_DIR / 'media'
 MEDIA_URL = '/media/'
 
+REST_FRAMEWORK = {
+    'DEFAULT_FILTER_BACKENDS': ('django_filters.rest_framework.DjangoFilterBackend',),
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
+}
+
+from core.config.settings.jwt import *
+from core.config.settings.custom import *
+from core.config.settings.celery import *
+from core.config.settings.cors import *
+
+from core.config.settings.debug_toolbar.settings import *
+from core.config.settings.debug_toolbar.setup import DebugToolbarSetup
+
+INSTALLED_APPS, MIDDLEWARE = DebugToolbarSetup.do_settings(INSTALLED_APPS, MIDDLEWARE)

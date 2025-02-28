@@ -5,6 +5,8 @@ from rest_framework.views import APIView
 from core.apps.education.models import Institution
 from core.apps.education.selectors import DjangoORMInstitutionSelector
 from core.apps.education.services import DjangoORMInstitutionService
+from core.apps.tasks.models import Email
+from core.apps.tasks.tasks import send_email
 
 
 class InstitutionCreateAPI(APIView):
@@ -56,11 +58,11 @@ class InstitutionUpdateAPI(APIView):
                 institution_id=institution_id
         ):
             return Response(status=status.HTTP_403_FORBIDDEN)
-
         service.update_institution(
             institution_id=institution_id,
             **serializer.validated_data
         )
+
 
         return Response(status=status.HTTP_200_OK)
 
@@ -72,8 +74,8 @@ class InstitutionDeleteAPI(APIView):
                 owner_id=request.user.id,
                 institution_id=institution_id
         ):
-            return Response(status=status.HTTP_403_FORBIDDEN)
-
+            return Response(status=status.HTTP_403_FORBIDDEN, data={'message': 'You are not the owner of this institution'})
         service.delete_institution(institution_id=institution_id)
+        send_email.apply_async_on_commit(kwargs={'type': Email.EmailType.DELETING, 'to': request.user.email})
 
         return Response(status=status.HTTP_204_NO_CONTENT)

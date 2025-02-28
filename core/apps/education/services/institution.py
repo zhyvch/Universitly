@@ -13,8 +13,8 @@ class DjangoORMInstitutionService:
     def create_institution(self,
             owner_id: int,
             title: str,
-            type: Optional[str] = None,
-            icon: Optional[str] = None,
+            type: str | None = None,
+            icon: str | None = None,
     ) -> Institution:
         institution = Institution()
         institution.owner_id = owner_id
@@ -32,9 +32,9 @@ class DjangoORMInstitutionService:
     def update_institution(
             self,
             institution_id: int,
-            title: Optional[str] = None,
-            type: Optional[str] = None,
-            icon: Optional[str] = None,
+            title: str | None = None,
+            type: str | None = None,
+            icon: str | None = None,
     ) -> Institution:
         institution = self.selector.get_institution_by_id(institution_id)
         if title:

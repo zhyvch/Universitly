@@ -7,7 +7,7 @@ services:
       dockerfile: Dockerfile
     container_name: universitly
     ports:
-      - "${DJANGO_PORT}:8000"
+      - '${DJANGO_PORT}:8000'
     command: sh /entrypoint.sh
     env_file:
       - ../.env
@@ -17,30 +17,34 @@ services:
     volumes:
       - ..:/app/
 
-  celery_worker:
+  celery:
     build:
       context: ..
       dockerfile: Dockerfile
     container_name: universitly_celery_worker
-    command: celery -A core.config.settings worker --loglevel=info
-
+    command: celery -A core.apps.tasks worker -l info --without-gossip --without-mingle --without-heartbeat
     env_file:
       - ../.env
     depends_on:
       - universitly
+      - postgres
       - rabbitmq
     volumes:
       - ..:/app/
+    restart: on-failure
 
-  celery_beat:
+  beats:
     build:
       context: ..
       dockerfile: Dockerfile
     container_name: universitly_celery_beat
-    command: celery -A core.config.settings beat --loglevel=info
+    command: celery -A core.apps.tasks beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
     env_file:
       - ../.env
     depends_on:
       - universitly
+      - postgres
       - rabbitmq
-
+    volumes:
+      - ..:/app/
+    restart: on-failure

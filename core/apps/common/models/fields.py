@@ -2,15 +2,15 @@ from django.db.models import CharField
 from django.utils.translation import gettext_lazy as _
 
 from core.apps.common import validators
-from core.config.settings import USE_E164
 
+from django.conf import settings
 
 class PhoneNumberField(CharField):
     default_validators = [validators.validate_phone_number]
 
     @property
     def description(self):
-        return _('Phone number (E.164 format)') if USE_E164 else _('Phone number')
+        return _('Phone number (E.164 format)') if settings.USE_E164 else _('Phone number')
 
     def __init__(self, *args, **kwargs):
         kwargs.setdefault('max_length', 15)

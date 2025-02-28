@@ -3,7 +3,7 @@ from django.utils.deconstruct import deconstructible
 from django.utils.regex_helper import _lazy_re_compile
 from django.utils.translation import gettext_lazy as _
 
-from core.config.settings import PHONE_NUMBER_ACCESS_CONTROL, TRUNCATE_TOO_LONG_PHONE_NUMBERS, USE_E164
+from django.conf import settings
 
 import phonenumbers
 
@@ -20,10 +20,10 @@ class PhoneNumberValidator:
         r'^\+?\d{1,4}[-.\s]?\(?\d{1,4}\)?[-.\s]?\d{1,4}[-.\s]?\d{1,9}$'
     )
     allowlist_regex = _lazy_re_compile(
-        '|'.join(PHONE_NUMBER_ACCESS_CONTROL.get('allowlist'))
+        '|'.join(settings.PHONE_NUMBER_ACCESS_CONTROL.get('allowlist'))
     )
     denylist_regex = _lazy_re_compile(
-        '|'.join(PHONE_NUMBER_ACCESS_CONTROL.get('denylist'))
+        '|'.join(settings.PHONE_NUMBER_ACCESS_CONTROL.get('denylist'))
     )
 
     def __init__(self, message=None, code=None):
@@ -35,7 +35,7 @@ class PhoneNumberValidator:
     def __call__(self, value):
         error = ValidationError(self.message, code=self.code, params={'value': value})
 
-        if USE_E164:
+        if settings.USE_E164:
             if not value or value[0] != '+' or len(value) > 15:
                 raise error
 
@@ -50,7 +50,7 @@ class PhoneNumberValidator:
             except phonenumbers.NumberParseException:
                 raise error
 
-            if TRUNCATE_TOO_LONG_PHONE_NUMBERS:
+            if settings.TRUNCATE_TOO_LONG_PHONE_NUMBERS:
                 phonenumbers.truncate_too_long_number(number_obj)
 
             if not phonenumbers.is_valid_number(number_obj):

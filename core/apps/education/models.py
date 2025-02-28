@@ -6,7 +6,7 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from core.apps.common.models import TitledTimestampedBaseModel, TitledBaseModel
-from core.config.settings import AUTH_USER_MODEL
+from django.conf import settings
 
 
 class Institution(TitledTimestampedBaseModel):
@@ -27,7 +27,7 @@ class Institution(TitledTimestampedBaseModel):
     )
     owner = models.ForeignKey(
         verbose_name=_('Owner'),
-        to=AUTH_USER_MODEL,
+        to=settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         related_name='owned_institutions',
         null=True,
@@ -55,12 +55,12 @@ class Course(TitledTimestampedBaseModel):
     )
     teachers = models.ManyToManyField(
         verbose_name=_('Teachers'),
-        to=AUTH_USER_MODEL,
+        to=settings.AUTH_USER_MODEL,
         related_name='teaching_courses',
     )
     students = models.ManyToManyField(
         verbose_name=_('Students'),
-        to=AUTH_USER_MODEL,
+        to=settings.AUTH_USER_MODEL,
         related_name='enrolled_courses',
     )
 

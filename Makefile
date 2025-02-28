@@ -1,32 +1,32 @@
 DC = docker compose
 EXEC = docker exec -it
 LOGS = docker logs
-STORAGES_FILE = docker_compose/storages.yaml
+INFRA_FILE = docker_compose/infra.yaml
 APP_FILE = docker_compose/app.yaml
 ENV_FILE = .env
 DB_CONTAINER = universitly_db
 APP_CONTAINER = universitly
 MANAGE = python manage.py
 
-.PHONY: storages
+.PHONY: infra
 storages:
-	${DC} -f ${STORAGES_FILE} --env-file ${ENV_FILE} up -d
+	${DC} -f ${INFRA_FILE} --env-file ${ENV_FILE} up -d
 
-.PHONY: storages-down
+.PHONY: infra-down
 storages-down:
-	${DC} -f ${STORAGES_FILE} down
+	${DC} -f ${INFRA_FILE} down
 
-.PHONY: storages-logs
+.PHONY: infra-logs
 storages-logs:
 	${LOGS} ${DB_CONTAINER} -f
 
 .PHONY: app
 app:
-	${DC} -f ${APP_FILE} -f ${STORAGES_FILE} --env-file ${ENV_FILE} up --build -d
+	${DC} -f ${APP_FILE} -f ${INFRA_FILE} --env-file ${ENV_FILE} up --build -d
 
 .PHONY: app-down
 app-down:
-	${DC} -f ${APP_FILE} -f ${STORAGES_FILE} down
+	${DC} -f ${APP_FILE} -f ${INFRA_FILE} down
 
 .PHONY: app-logs
 app-logs:

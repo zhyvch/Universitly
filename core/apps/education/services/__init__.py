@@ -1,1 +1,1 @@
-from .institution_services import *
+from .institution import *
