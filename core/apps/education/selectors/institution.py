@@ -4,14 +4,13 @@ from core.apps.education.models import Institution
 
 
 class DjangoORMInstitutionSelector:
-    @staticmethod
-    def get_institution_list() -> Iterable[Institution]:
-        return Institution.objects.all()
+    model = Institution
 
-    @staticmethod
-    def get_institution_by_id(institution_id) -> Institution:
-        return Institution.objects.get(id=institution_id)
+    def get_institution_list(self) -> Iterable[model]:
+        return self.model.objects.all()
 
-    @staticmethod
-    def validate_ownership(owner_id: int, institution_id: int) -> bool:
-        return Institution.objects.filter(owner_id=owner_id, id=institution_id).exists()
+    def get_institution_by_id(self, institution_id) -> model:
+        return self.model.objects.get(id=institution_id)
+
+    def validate_ownership(self, owner_id: int, institution_id: int) -> bool:
+        return self.model.objects.filter(owner_id=owner_id, id=institution_id).exists()

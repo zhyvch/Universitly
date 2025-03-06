@@ -5,8 +5,6 @@ from rest_framework.views import APIView
 from core.apps.education.models import Institution
 from core.apps.education.selectors import DjangoORMInstitutionSelector
 from core.apps.education.services import DjangoORMInstitutionService
-from core.apps.tasks.models import Email
-from core.apps.tasks.tasks import send_email
 
 
 class InstitutionCreateAPI(APIView):
@@ -18,10 +16,11 @@ class InstitutionCreateAPI(APIView):
     def post(self, request):
         serializer = self.InputSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+
         service = DjangoORMInstitutionService()
         service.create_institution(
-            owner_id=request.user.id,
-            **serializer.validated_data
+            owner=request.user,
+            **serializer.validated_data,
         )
 
         return Response(status=status.HTTP_201_CREATED)
@@ -37,7 +36,8 @@ class InstitutionListAPI(APIView):
         updated_at = serializers.DateTimeField()
 
     def get(self, request):
-        institution_list = DjangoORMInstitutionSelector.get_institution_list()
+        selector = DjangoORMInstitutionSelector()
+        institution_list = selector.get_institution_list()
         data = self.OutputSerializer(institution_list, many=True).data
 
         return Response(data=data)
@@ -52,17 +52,13 @@ class InstitutionUpdateAPI(APIView):
     def patch(self, request, institution_id):
         serializer = self.InputSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        service = DjangoORMInstitutionService()
-        if not DjangoORMInstitutionSelector.validate_ownership(
-                owner_id=request.user.id,
-                institution_id=institution_id
-        ):
-            return Response(status=status.HTTP_403_FORBIDDEN)
-        service.update_institution(
-            institution_id=institution_id,
-            **serializer.validated_data
-        )
 
+        service = DjangoORMInstitutionService()
+        service.update_institution(
+            owner=request.user,
+            institution_id=institution_id,
+            **serializer.validated_data,
+        )
 
         return Response(status=status.HTTP_200_OK)
 
@@ -70,12 +66,9 @@ class InstitutionUpdateAPI(APIView):
 class InstitutionDeleteAPI(APIView):
     def delete(self, request, institution_id):
         service = DjangoORMInstitutionService()
-        if not DjangoORMInstitutionSelector.validate_ownership(
-                owner_id=request.user.id,
-                institution_id=institution_id
-        ):
-            return Response(status=status.HTTP_403_FORBIDDEN, data={'message': 'You are not the owner of this institution'})
-        service.delete_institution(institution_id=institution_id)
-        send_email.apply_async_on_commit(kwargs={'type': Email.EmailType.DELETING, 'to': request.user.email})
+        service.delete_institution(
+            owner=request.user,
+            institution_id=institution_id,
+        )
 
         return Response(status=status.HTTP_204_NO_CONTENT)

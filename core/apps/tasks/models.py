@@ -6,15 +6,14 @@ from core.apps.common.models import TimestampedBaseModel
 
 class Email(TimestampedBaseModel):
     class EmailType(models.TextChoices):
-        CREATING = 'C', _('Creating')
-        UPDATING = 'U', _('Updating')
-        DELETING = 'D', _('Deleting')
+        CREATING_INSTITUTION = 'CI', _('Creating institution')
+        UPDATING_INSTITUTION = 'UI', _('Updating institution')
+        DELETING_INSTITUTION = 'DI', _('Deleting institution')
         MARKETING = 'M', _('Marketing')
 
     type = models.CharField(
         verbose_name=_('Type'),
         choices=EmailType,
-        default=EmailType.CREATING,
         unique=True,
     )
     subject = models.CharField(

@@ -176,7 +176,7 @@ class SectionHomework(TitledBaseModel):
         verbose_name_plural = _('Section homeworks')
         constraints = [
             CheckConstraint(
-                condition=Q(deadline__gt=timezone.now()),
+                check=Q(deadline__gt=timezone.now()),
                 name='deadline_gt_now',
             ),
         ]
@@ -250,15 +250,15 @@ class SectionTest(TitledBaseModel):
         verbose_name_plural = _('Section tests')
         constraints = [
             CheckConstraint(
-                condition=Q(max_score__gte=F('passing_score')),
+                check=Q(max_score__gte=F('passing_score')),
                 name='max_score_gte_passing_score',
             ),
             models.CheckConstraint(
-                condition=Q(start_date__gte=timezone.now()),
+                check=Q(start_date__gte=timezone.now()),
                 name='start_date_gte_now',
             ),
             models.CheckConstraint(
-                condition=Q(end_date__gt=F('start_date')),
+                check=Q(end_date__gt=F('start_date')),
                 name='end_date_gt_start_date',
             ),
         ]

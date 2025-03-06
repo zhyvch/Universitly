@@ -1,13 +1,25 @@
-from django.urls import path
+from rest_framework.viewsets import ViewSet
 
 from core.apps.education.apis import (
     InstitutionCreateAPI, InstitutionListAPI, InstitutionUpdateAPI, InstitutionDeleteAPI
 )
 
-urlpatterns = [
-    path('institutions/create/', InstitutionCreateAPI.as_view(), name='create_institution'),
-    path('institutions/', InstitutionListAPI.as_view(), name='institutions'),
-    # path('institutions/<int:institution_id>/', InstitutionDetailAPI.as_view(), name='institution'),
-    path('institutions/<int:institution_id>/update/', InstitutionUpdateAPI.as_view(), name='update_institution'),
-    path('institutions/<int:institution_id>/delete/', InstitutionDeleteAPI.as_view(), name='delete_institution'),
-]
+from rest_framework.routers import SimpleRouter
+
+class InstitutionViewSet(ViewSet):
+    def list(self, request):
+        return InstitutionListAPI.as_view()(request._request)
+
+    def create(self, request):
+        return InstitutionCreateAPI.as_view()(request._request)
+
+    def partial_update(self, request, pk=None):
+        return InstitutionUpdateAPI.as_view()(request._request, institution_id=pk)
+
+    def destroy(self, request, pk=None):
+        return InstitutionDeleteAPI.as_view()(request._request, institution_id=pk)
+
+router = SimpleRouter()
+router.register('institutions', InstitutionViewSet, basename='institution')
+
+urlpatterns = router.urls

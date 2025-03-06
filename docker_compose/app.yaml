@@ -33,7 +33,7 @@ services:
       - ..:/app/
     restart: on-failure
 
-  beats:
+  celery-beat:
     build:
       context: ..
       dockerfile: Dockerfile

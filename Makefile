@@ -6,6 +6,8 @@ APP_FILE = docker_compose/app.yaml
 ENV_FILE = .env
 DB_CONTAINER = universitly_db
 APP_CONTAINER = universitly
+CELERY_CONTAINER = universitly_celery_worker
+CELERY_BEAT_CONTAINER = universitly_celery_beat
 MANAGE = python manage.py
 
 .PHONY: infra
@@ -54,4 +56,16 @@ shell:
 
 .PHONY: celery-logs
 celery-logs:
-	${LOGS} universitly_celery_worker -f
+	${LOGS} ${CELERY_CONTAINER} -f
+
+.PHONY: celery-beat-logs
+celery-beat-logs:
+	${LOGS} ${CELERY_BEAT_CONTAINER} -f
+
+.PHONY: redis-logs
+redis-logs:
+	${LOGS} universitly_redis -f
+
+.PHONY: rabbitmq-logs
+rabbitmq-logs:
+	${LOGS} universitly_rabbitmq -f

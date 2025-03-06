@@ -20,7 +20,6 @@ LOCAL_APPS = [
 THIRD_PARTY_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
-    'rest_framework_simplejwt.token_blacklist',
     'django_filters',
     'django_celery_results',
     'django_celery_beat',
@@ -118,6 +117,13 @@ AUTH_USER_MODEL = 'users.User'
 MEDIA_ROOT = BASE_DIR / 'media'
 MEDIA_URL = '/media/'
 
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+        'LOCATION': env.str('REDIS_URL'),
+    }
+}
+
 REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': ('django_filters.rest_framework.DjangoFilterBackend',),
     'DEFAULT_AUTHENTICATION_CLASSES': [
@@ -126,9 +132,12 @@ REST_FRAMEWORK = {
 }
 
 from core.config.settings.jwt import *
-from core.config.settings.custom import *
 from core.config.settings.celery import *
+from core.config.settings.emails import *
 from core.config.settings.cors import *
+# from core.config.settings.logging import *
+from core.config.settings.custom import *
+
 
 from core.config.settings.debug_toolbar.settings import *
 from core.config.settings.debug_toolbar.setup import DebugToolbarSetup
