@@ -18,10 +18,10 @@ app.conf.update(
     broker_connection_retry_on_startup=True,
 )
 
-app.conf.beat_schedule = {
-    'send_weekly_emails': {
-        'task': 'core.apps.tasks.tasks.send_weekly_emails',
-        'schedule': crontab(day_of_week='FRI', hour='16'),
-        'kwargs': {'email_type': 'M'},
-    },
-}
+# app.conf.beat_schedule = {
+#     'send_weekly_emails': {
+#         'task': 'core.apps.tasks.tasks.send_weekly_emails',
+#         'schedule': crontab(day_of_week='FRI', hour='16'),
+#         'kwargs': {'email_type': 'M'},
+#     },
+# }

@@ -37,6 +37,9 @@ class Institution(TitledTimestampedBaseModel):
     def number_of_courses(self):
         return self.courses.count()
 
+    def is_owner(self, user_id):
+        return self.owner.id == user_id
+
 
     class Meta:
         verbose_name = _('Institution')

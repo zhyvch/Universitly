@@ -1,24 +1,29 @@
-from django.conf import settings
+from typing import TypeVar
+
+from django.contrib.auth import get_user_model
 from django.db import transaction
 
 from core.apps.education.models import Institution
-from core.apps.education.selectors import DjangoORMInstitutionSelector
+from core.apps.education.selectors import DjangoORMInstitutionSelector, IT
 from core.apps.tasks.models import Email
 from core.apps.tasks.tasks import send_email
 
-class DjangoORMInstitutionService:
+UT = TypeVar('UT', bound=get_user_model())
+
+
+class DjangoORMInstitutionService[IT, UT]:
     selector = DjangoORMInstitutionSelector()
 
     @transaction.atomic
     def create_institution(
             self,
-            owner: settings.AUTH_USER_MODEL,
+            user: UT,
             title: str,
             type: str | None = None,
             icon: str | None = None,
-    ) -> Institution:
+    ) -> IT:
         institution = Institution()
-        institution.owner = owner
+        institution.owner = user
         institution.title = title
         if type:
             institution.type = type
@@ -29,8 +34,8 @@ class DjangoORMInstitutionService:
 
         send_email.apply_async_on_commit(kwargs={
             'email_type': Email.EmailType.CREATING_INSTITUTION,
-            'to': owner.email,
-            'name': owner.get_full_name() or owner.email[:owner.email.index('@')],
+            'to': user.email,
+            'name': user.get_full_name() or user.email[:user.email.index('@')],
             'institution': institution.title,
         })
 
@@ -39,33 +44,37 @@ class DjangoORMInstitutionService:
     @transaction.atomic
     def update_institution(
             self,
-            owner: settings.AUTH_USER_MODEL,
+            user: UT,
             institution_id: int,
             title: str | None = None,
             type: str | None = None,
             icon: str | None = None,
-    ) -> Institution:
-        if not self.selector.validate_ownership(owner_id=owner.id, institution_id=institution_id):
+    ) -> IT:
+        try:
+            institution = self.selector.get_institution_by_id(institution_id)
+        except Institution.DoesNotExist:
+            raise
+
+        if not institution.is_owner(user.id):
             raise
 
         institution = self.selector.get_institution_by_id(institution_id)
         changes_log = ''
         if title:
-            changes_log+=f'\nChanged title from "{institution.title}" to "{title}"'
+            changes_log += f'\nChanged title from "{institution.title}" to "{title}"'
             institution.title = title
         if type:
-            changes_log+=f'\nChanged type from "{institution.type}" to "{type}"'
+            changes_log += f'\nChanged type from "{institution.type}" to "{type}"'
             institution.type = type
         if icon:
-            changes_log+=f'\nChanged icon from "{institution.icon}" to "{icon}"'
+            changes_log += f'\nChanged icon from "{institution.icon}" to "{icon}"'
             institution.icon = icon
         institution.full_clean()
         institution.save()
-
         send_email.apply_async_on_commit(kwargs={
             'email_type': Email.EmailType.UPDATING_INSTITUTION,
-            'to': owner.email,
-            'name': owner.get_full_name() or owner.email[:owner.email.index('@')],
+            'to': user.email,
+            'name': user.get_full_name() or user.email[:user.email.index('@')],
             'institution': institution.title,
             'changes': changes_log
         })
@@ -75,18 +84,22 @@ class DjangoORMInstitutionService:
     @transaction.atomic
     def delete_institution(
             self,
-            owner: settings.AUTH_USER_MODEL,
+            user: UT,
             institution_id: int,
     ) -> None:
-        if not self.selector.validate_ownership(owner_id=owner.id, institution_id=institution_id):
+        try:
+            institution = self.selector.get_institution_by_id(institution_id)
+        except Institution.DoesNotExist:
             raise
 
-        institution = self.selector.get_institution_by_id(institution_id)
+        if not institution.is_owner(user.id):
+            raise
+
         institution.delete()
 
         send_email.apply_async_on_commit(kwargs={
             'email_type': Email.EmailType.DELETING_INSTITUTION,
-            'to': owner.email,
-            'name': owner.get_full_name() or owner.email[:owner.email.index('@')],
+            'to': user.email,
+            'name': user.get_full_name() or user.email[:user.email.index('@')],
             'institution': institution.title,
         })

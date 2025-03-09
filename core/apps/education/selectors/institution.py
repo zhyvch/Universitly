@@ -1,16 +1,17 @@
-from typing import Iterable
+from typing import TypeVar
+
+from django.db.models import QuerySet
 
 from core.apps.education.models import Institution
 
+IT = TypeVar('IT', bound=Institution)
 
-class DjangoORMInstitutionSelector:
-    model = Institution
 
-    def get_institution_list(self) -> Iterable[model]:
+class DjangoORMInstitutionSelector[IT]:
+    model: type[IT] = Institution
+
+    def get_institution_list(self) -> QuerySet[IT]:
         return self.model.objects.all()
 
-    def get_institution_by_id(self, institution_id) -> model:
+    def get_institution_by_id(self, institution_id: int) -> IT:
         return self.model.objects.get(id=institution_id)
-
-    def validate_ownership(self, owner_id: int, institution_id: int) -> bool:
-        return self.model.objects.filter(owner_id=owner_id, id=institution_id).exists()
