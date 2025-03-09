@@ -138,7 +138,7 @@ from core.config.settings.jwt import *
 from core.config.settings.celery import *
 from core.config.settings.emails import *
 from core.config.settings.cors import *
-# from core.config.settings.logging import *
+from core.config.settings.logging import *
 from core.config.settings.custom import *
 
 

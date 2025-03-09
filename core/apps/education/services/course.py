@@ -1,12 +1,7 @@
-from typing import TypeVar
-
-from django.contrib.auth import get_user_model
 from django.db import transaction
 
-from core.apps.education.selectors import DjangoORMCourseSelector
-
-
-UT = TypeVar('UT', bound=get_user_model())
+from core.apps.education.selectors import DjangoORMCourseSelector, CT
+from core.apps.users.selectors import UT
 
 class DjangoORMCourseService[UT, CT]:
     selector = DjangoORMCourseSelector()

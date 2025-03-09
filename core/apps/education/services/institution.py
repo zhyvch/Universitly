@@ -1,14 +1,10 @@
-from typing import TypeVar
-
-from django.contrib.auth import get_user_model
 from django.db import transaction
 
 from core.apps.education.models import Institution
 from core.apps.education.selectors import DjangoORMInstitutionSelector, IT
+from core.apps.users.selectors import UT
 from core.apps.tasks.models import Email
 from core.apps.tasks.tasks import send_email
-
-UT = TypeVar('UT', bound=get_user_model())
 
 
 class DjangoORMInstitutionService[IT, UT]:
@@ -35,7 +31,7 @@ class DjangoORMInstitutionService[IT, UT]:
         send_email.apply_async_on_commit(kwargs={
             'email_type': Email.EmailType.CREATING_INSTITUTION,
             'to': user.email,
-            'name': user.get_full_name() or user.email[:user.email.index('@')],
+            'name': user.full_name or user.email_username,
             'institution': institution.title,
         })
 
@@ -74,7 +70,7 @@ class DjangoORMInstitutionService[IT, UT]:
         send_email.apply_async_on_commit(kwargs={
             'email_type': Email.EmailType.UPDATING_INSTITUTION,
             'to': user.email,
-            'name': user.get_full_name() or user.email[:user.email.index('@')],
+            'name': user.full_name or user.email_username,
             'institution': institution.title,
             'changes': changes_log
         })
@@ -100,6 +96,6 @@ class DjangoORMInstitutionService[IT, UT]:
         send_email.apply_async_on_commit(kwargs={
             'email_type': Email.EmailType.DELETING_INSTITUTION,
             'to': user.email,
-            'name': user.get_full_name() or user.email[:user.email.index('@')],
+            'name': user.full_name or user.email_username,
             'institution': institution.title,
         })

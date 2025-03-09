@@ -1,5 +1,4 @@
 from rest_framework.viewsets import ViewSet
-from rest_framework.routers import SimpleRouter
 from rest_framework_nested.routers import SimpleRouter, NestedSimpleRouter
 
 from core.apps.education.apis import (

@@ -1,7 +1,6 @@
 from rest_framework import serializers, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from core.apps.education.models import Institution, Course, Section
 from core.apps.education.services import DjangoORMInstitutionService, DjangoORMCourseService
@@ -18,8 +17,7 @@ class InstitutionCreateAPI(APIView):
     def post(self, request):
         serializer = self.InputSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        service = DjangoORMInstitutionService()
-        service.create_institution(
+        self.service.create_institution(
             user=request.user,
             **serializer.validated_data,
         )
